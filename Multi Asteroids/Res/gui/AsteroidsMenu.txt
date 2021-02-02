@@ -1,0 +1,25 @@
+Renderer.1 {
+    textcolor = rgb(190, 190, 190);
+    textcolorhover = rgb(250, 250, 250);
+    texture = "Res/gui/themes/Black.png" Part( 0, 64, 45, 50) Middle(10, 0, 25, 50);
+    texturedisabled = None;
+    texturedown = "Res/gui/themes/Black.png" Part(90, 64, 45, 50) Middle(10, 0, 25, 50);
+    texturefocused = "Res/gui/themes/Black.png" Part(135, 64, 45, 50) Middle(10, 0, 25, 50);
+    texturehover = "Res/gui/themes/Black.png" Part(45, 64, 45, 50) Middle(10, 0, 25, 50);
+}
+
+Button.MultiplayerBtn {
+    Position = ((1280 / 2) - (107 / 2), 340);
+    Size = (107, 22);
+    Text = Multiplayer;
+    TextSize = 14;
+    renderer = &1;
+}
+
+Button.SingleplayerBtn {
+    Position = ((1280 / 2) - (107 / 2), 300);
+    Size = (107, 22);
+    Text = Singleplayer;
+    TextSize = 14;
+    renderer = &1;
+}
