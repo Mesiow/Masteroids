@@ -187,13 +187,13 @@ void Peer::handleConnectionRequest(const sf::IpAddress& address, uint16_t port)
 	endPoint.address = address;
 	endPoint.port = port;
 
-	sf::Vector2f spawnPosition = sf::Vector2f((float)(SCREEN_WIDTH / 2.0f) - 50.0f, (float)SCREEN_HEIGHT / 2.0f);
-	Client_t peerId = _multi.addPlayer(endPoint);
-	_multi.getPlayer(peerId).setPosition(spawnPosition.x, spawnPosition.y);
+	sf::Vector2f spawnPosition = sf::Vector2f((float)(SCREEN_WIDTH / 2.0f) - 60.0f, (float)SCREEN_HEIGHT / 2.0f);
 
-	response << ePacket::ConnectionResponse << (uint8_t)1 << peerId << _id;
+	Client_t peerId = _multi.addPlayer(endPoint);
+	_multi.handleSpawn(peerId, spawnPosition.x, spawnPosition.y);
+
+	response << ePacket::ConnectionResponse << (uint8_t)1 << peerId << _id << spawnPosition.x << spawnPosition.y;
 	sendPacket(response, endPoint);
-	//_simRunning = true;
 	_multi.setSimRunning(_id, true);
 }
 
@@ -202,6 +202,7 @@ void Peer::handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& add
 	uint8_t response;
 	Client_t our_id;
 	Client_t host_id;
+	float x, y;
 	///*
 	//	Check if incoming response data is coming from the host peer
 	//*/
@@ -209,13 +210,15 @@ void Peer::handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& add
 		std::cout << "Incoming from host\n";
 		if (packet >> response) {
 			if (response) {
-				if (packet >> our_id >> host_id) {
+				if (packet >> our_id >> host_id >> x >> y) {
 					//Save id and host id and create new peer
 					_id = our_id;
 					std::cout << "Host id: " << (int)host_id << std::endl;
 					std::cout << "Our id: " << (int)our_id << std::endl;
 					_multi.addPlayer(_multi.getHost(), host_id); //add host
 					_multi.addPlayer({ this->address, this->port }, _id); //add ourself
+					_multi.handleSpawn(_id, x, y);
+
 					socket.setBlocking(false);
 					/*
 						Successfully connected
@@ -258,7 +261,7 @@ void Peer::handlePeerBullet(sf::Packet& packet)
 	float x, y, dx, dy;
 	if (packet >> id) {
 		packet >> x >> y >> dx >> dy;
-		_multi.updatePeerBullet(id, { x, y, dx, dy });
+		_multi.spawnPeerBullet(id, { x, y, dx, dy });
 	}
 }
 

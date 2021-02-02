@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "Packets.h"
 #include "../Entities/Player.h"
+#include "../Entities/AsteroidManager.h"
 #include <algorithm>
 #include <array>
 
@@ -39,9 +40,11 @@ public:
 	*/
 	void updatePeer(Client_t id, PeerState state);
 	/*
-		Update peer bullets with new bullet data
+		Spawn peer bullets with new bullet data
 	*/
-	void updatePeerBullet(Client_t id, BulletState state);
+	void spawnPeerBullet(Client_t id, BulletState state);
+
+	void handleSpawn(Client_t id, float x, float y);
 
 	void addPlayer(PeerEndPoint endPoint, Client_t id);
 	/*
@@ -65,8 +68,6 @@ public:
 
 private:
 	void initialize();
-	void handleSpawn(Client_t peerId);
-
 	void zeroMem();
 	int emptySlot();
 
@@ -74,6 +75,7 @@ private:
 	PeerEndPoint _host;
 	std::array<PeerEndPoint, MAX_CONNECTIONS> _peerEndPoints;
 	std::array<Player*, MAX_CONNECTIONS> _peers;
+	std::array<AsteroidManager, MAX_CONNECTIONS> _asteroids;
 	std::array<bool, MAX_CONNECTIONS> _connects;
 	std::array<bool, MAX_CONNECTIONS> _simRunning;
 };

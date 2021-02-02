@@ -26,17 +26,22 @@ void Multiplayer::render(sf::RenderTarget& target)
 void Multiplayer::update(Client_t id, float dt)
 {
 	//Update locally
-	if(_connects[id])
+	if (_connects[id]) {
 		_peers[id]->update(dt);
+		_asteroids[id].update(dt);
+	}
 
 	//Update all peer bullets
 	for (size_t i = 0; i < MAX_CONNECTIONS; ++i) {
 		if (_connects[i]) {
 			if (_peers[i]) {
-				_peers[i]->updateBullets(dt);
+				if(id != i) //update peer bullets, make sure we are not updating our own bullets again locally
+					_peers[i]->updateBullets(dt);
 			}
 		}
 	}
+
+	//Update all peer asteroids
 }
 
 void Multiplayer::handleInput(Client_t id, float dt)
@@ -65,7 +70,7 @@ void Multiplayer::updatePeer(Client_t id, PeerState state)
 	}
 }
 
-void Multiplayer::updatePeerBullet(Client_t id, BulletState state)
+void Multiplayer::spawnPeerBullet(Client_t id, BulletState state)
 {
 	if (_connects[id]) {
 		_peers[id]->shoot(state.x, state.y, state.dx, state.dy);
@@ -124,9 +129,9 @@ bool Multiplayer::isPeerConnected(Client_t id) const
 	return _connects[id];
 }
 
-void Multiplayer::handleSpawn(Client_t peerId)
+void Multiplayer::handleSpawn(Client_t id, float x, float y)
 {
-	
+	_peers[id]->setPosition(x, y);
 }
 
 void Multiplayer::zeroMem()
