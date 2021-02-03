@@ -1,5 +1,10 @@
 #include "AsteroidManager.h"
 
+AsteroidManager::AsteroidManager()
+{
+	_asteroids.clear();
+}
+
 void AsteroidManager::render(sf::RenderTarget& target)
 {
 	for (auto& a : _asteroids) a.render(target);

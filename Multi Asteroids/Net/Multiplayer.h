@@ -21,6 +21,11 @@ struct BulletState {
 	float x, y, dx, dy; //position and direction of bullet when it fired
 };
 
+struct AsteroidState {
+	float x, y;
+	float rot;
+};
+
 /*
 	Class that takes care of connecting/storing peers, entities and sending data to peers
 	in a P2P architecture and runs the multiplayer simulation
@@ -39,12 +44,16 @@ public:
 		Update peer with new state data
 	*/
 	void updatePeer(Client_t id, PeerState state);
+	void updateAsteroid(Client_t id, uint8_t asteroidId, AsteroidState state);
 	/*
 		Spawn peer bullets with new bullet data
 	*/
 	void spawnPeerBullet(Client_t id, BulletState state);
 
+	void spawnPeerAsteroid(Client_t id, AsteroidState state);
+
 	void handleSpawn(Client_t id, float x, float y);
+	void handleAsteroidSpawn(Client_t id, float x, float y);
 
 	void addPlayer(PeerEndPoint endPoint, Client_t id);
 	/*
@@ -63,7 +72,10 @@ public:
 	PeerEndPoint getPeer(Client_t id)const;
 	bool isPeerConnected(Client_t id)const;
 	bool isSimRunning(Client_t id)const { return _simRunning[id]; }
+
+
 	const Player& getPlayer(Client_t id)const { return *_peers[id]; }
+	const std::vector<Asteroid>& getAsteroids(Client_t id)const { return _asteroids[id]->getAsteroids(); }
 	Player& getPlayer(Client_t id) { return *_peers[id]; }
 
 private:
@@ -71,11 +83,14 @@ private:
 	void zeroMem();
 	int emptySlot();
 
+	bool playersAreReady();
+
 private:
 	PeerEndPoint _host;
 	std::array<PeerEndPoint, MAX_CONNECTIONS> _peerEndPoints;
 	std::array<Player*, MAX_CONNECTIONS> _peers;
-	std::array<AsteroidManager, MAX_CONNECTIONS> _asteroids;
+	std::array<AsteroidManager*, MAX_CONNECTIONS> _asteroids;
 	std::array<bool, MAX_CONNECTIONS> _connects;
 	std::array<bool, MAX_CONNECTIONS> _simRunning;
+	bool _running = false;
 };

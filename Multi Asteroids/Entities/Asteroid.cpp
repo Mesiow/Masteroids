@@ -1,10 +1,20 @@
 #include "Asteroid.h"
 #include <iostream>
+Asteroid::Asteroid(float radius, const sf::Vector2f& position, const sf::Vector2f& direction)
+{
+	_radius = radius;
+	_position = position;
+	_direction = direction;
+
+	build();
+}
 Asteroid::Asteroid(float radius, float x, float y)
 {
 	_radius = radius;
 	_position = sf::Vector2f(x, y);
+
 	build();
+	initialize();
 }
 
 void Asteroid::render(sf::RenderTarget& target)
@@ -32,14 +42,29 @@ void Asteroid::setPosition(float x, float y)
 	_shape.setPosition(x, y);
 }
 
+void Asteroid::setRotation(float rot)
+{
+	_shape.setRotation(rot);
+}
+
 float Asteroid::getRadius() const
 {
 	return _radius;
 }
 
+float Asteroid::getRotation() const
+{
+	return _shape.getRotation();
+}
+
 sf::Vector2f Asteroid::getPosition() const
 {
 	return _shape.getPosition();
+}
+
+sf::Vector2f Asteroid::getDirection() const
+{
+	return _direction;
 }
 
 void Asteroid::build()
@@ -66,12 +91,17 @@ void Asteroid::build()
 	_velocity = sf::Vector2f(0, 0);
 	_angle = 0;
 	_rotationSpeed = 0.5f;
+	_speed = 90.0f;
+}
 
+void Asteroid::initialize()
+{
+	thor::setRandomSeed(1);
 	//Random direction
 	float rx = thor::random(0.0f, 360.0f);
 	float ry = thor::random(0.0f, 360.0f);
 	_direction.x = sin(M_PI * rx / 180.0f);
 	_direction.y = -cos(M_PI * ry / 180.0f);
 	_direction = normalize(_direction);
-	_speed = thor::random(15.0f, 150.0f);
+	//_speed = thor::random(15.0f, 150.0f);
 }

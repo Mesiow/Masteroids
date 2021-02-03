@@ -11,6 +11,7 @@ Multiplayer::~Multiplayer()
 	for (size_t i = 0; i < MAX_CONNECTIONS; i++) {
 		if (_connects[i]) {
 			if (_peers[i]) delete _peers[i];
+			if (_asteroids[i]) delete _asteroids[i];
 		}
 	}
 }
@@ -18,30 +19,38 @@ Multiplayer::~Multiplayer()
 void Multiplayer::render(sf::RenderTarget& target)
 {
 	for (size_t i = 0; i < MAX_CONNECTIONS; i++) {
-		if (_connects[i])
+		if (_connects[i]) {
 			if (_peers[i]) _peers[i]->render(target);
-	}
+			if (_asteroids[i]) _asteroids[i]->render(target);
+		}
+	}	
 }
 
 void Multiplayer::update(Client_t id, float dt)
 {
-	//Update locally
-	if (_connects[id]) {
-		_peers[id]->update(dt);
-		_asteroids[id].update(dt);
+	if (playersAreReady() && !_running) {
+		std::cout << "Running\n";
+		_running = true;
 	}
 
-	//Update all peer bullets
-	for (size_t i = 0; i < MAX_CONNECTIONS; ++i) {
-		if (_connects[i]) {
-			if (_peers[i]) {
-				if(id != i) //update peer bullets, make sure we are not updating our own bullets again locally
-					_peers[i]->updateBullets(dt);
+	if (_running) {
+		//Update locally
+		if (_connects[id]) {
+			_peers[id]->update(dt);
+			_asteroids[id]->update(dt);
+		}
+
+
+		//Update all peer bullets
+		for (size_t i = 0; i < MAX_CONNECTIONS; ++i) {
+			if (_connects[i]) {
+				if (_peers[i]) {
+					if (id != i) //update peer bullets, make sure we are not updating our own bullets again locally
+						_peers[i]->updateBullets(dt);
+				}
 			}
 		}
 	}
-
-	//Update all peer asteroids
 }
 
 void Multiplayer::handleInput(Client_t id, float dt)
@@ -70,11 +79,29 @@ void Multiplayer::updatePeer(Client_t id, PeerState state)
 	}
 }
 
+void Multiplayer::updateAsteroid(Client_t id, uint8_t asteroidId, AsteroidState state)
+{
+	if (_connects[id]) {
+		_asteroids[id]->getAsteroids()[asteroidId].setPosition(state.x, state.y);
+		_asteroids[id]->getAsteroids()[asteroidId].setRotation(state.rot);
+	}
+}
+
 void Multiplayer::spawnPeerBullet(Client_t id, BulletState state)
 {
 	if (_connects[id]) {
 		_peers[id]->shoot(state.x, state.y, state.dx, state.dy);
 	}
+}
+
+void Multiplayer::spawnPeerAsteroid(Client_t id, AsteroidState state)
+{
+	/*if (_connects[id]) {
+		_asteroids[id]->getAsteroids()[id]
+		Asteroid asteroid(64.0f, sf::Vector2f(state.x, state.y), sf::Vector2f(state.dx, state.dy));
+		_asteroids[id]->add(asteroid);
+		std::cout << "spawned at " <<state.x <<", "<< state.y << "\n";
+	}*/
 }
 
 void Multiplayer::addPlayer(PeerEndPoint endPoint, Client_t id)
@@ -86,6 +113,9 @@ void Multiplayer::addPlayer(PeerEndPoint endPoint, Client_t id)
 	_peerEndPoints[id] = endPoint;
 	_connects[id] = true;
 	_peers[id] = new Player(playerColor);
+	_asteroids[id] = new AsteroidManager();
+	if (id == 0) _asteroids[id]->spawn(10, 10); //If host, spawn asteroid
+
 	std::cout << "Id: " << (int)id << std::endl;
 }
 
@@ -134,6 +164,11 @@ void Multiplayer::handleSpawn(Client_t id, float x, float y)
 	_peers[id]->setPosition(x, y);
 }
 
+void Multiplayer::handleAsteroidSpawn(Client_t id, float x, float y)
+{
+	_asteroids[id]->spawn(x, y);
+}
+
 void Multiplayer::zeroMem()
 {
 	std::fill(_peerEndPoints.begin(), _peerEndPoints.end(), PeerEndPoint());
@@ -149,4 +184,13 @@ int Multiplayer::emptySlot()
 			return i;
 	}
 	return -1;
+}
+
+bool Multiplayer::playersAreReady()
+{
+	int count = 0;
+	for (size_t i = 0; i < MAX_CONNECTIONS; ++i) {
+		if (_simRunning[i]) count++;
+	}
+	return count >= MAX_CONNECTIONS;
 }

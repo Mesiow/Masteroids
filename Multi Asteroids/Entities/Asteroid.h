@@ -6,16 +6,29 @@
 
 class Asteroid {
 public:
+	Asteroid(float radius, const sf::Vector2f& position, const sf::Vector2f& direction);
 	Asteroid(float radius, float x, float y);
 	void render(sf::RenderTarget& target);
 	void update(float& dt);
 	
 	void setPosition(float x, float y);
+	void setRotation(float rot);
+
+
 	float getRadius()const;
+	float getRotation()const;
 	sf::Vector2f getPosition()const;
+	sf::Vector2f getDirection()const;
 
 private:
+	/*
+		Builds asteroids' vertices
+	*/
 	void build();
+	/*
+		initializes asteroids properties such as random direction/speed
+	*/
+	void initialize();
 
 private:
 	sf::Vector2f _direction;

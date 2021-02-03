@@ -5,7 +5,7 @@
 
 class AsteroidManager {
 public:
-	AsteroidManager() = default;
+	AsteroidManager();
 	void render(sf::RenderTarget& target);
 	void update(float& dt);
 
@@ -19,6 +19,7 @@ public:
 
 	size_t getSize()const { return _asteroids.size(); }
 	const std::vector<Asteroid>& getAsteroids()const { return _asteroids; }
+	std::vector<Asteroid>& getAsteroids() { return _asteroids; }
 	std::vector<Asteroid> split(const Asteroid& asteroid);
 	
 private:

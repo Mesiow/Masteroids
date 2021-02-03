@@ -10,6 +10,7 @@ enum class eEvent : uint8_t {
 	None,
 	Shoot,
 	Dead,
+	AsteroidSpawn
 };
 
 class Peer : public Net {
@@ -46,6 +47,7 @@ private:
 
 	void sendPositionData(const PeerEndPoint& endPoint);
 	void sendBulletData(const PeerEndPoint &endPoint);
+	void sendAsteroidData(const PeerEndPoint& endPoint);
 
 	void handleConnectionRequest(const sf::IpAddress& address, uint16_t port);
 	void handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& address, uint16_t port);
@@ -55,6 +57,7 @@ private:
 	/* Handle Game Data Packets */
 	void handlePeerState(sf::Packet& packet);
 	void handlePeerBullet(sf::Packet& packet);
+	void handlePeerAsteroid(sf::Packet& packet);
 
 	///////
 	bool connect();

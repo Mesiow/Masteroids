@@ -110,6 +110,7 @@ void Peer::receivePackets()
 			/* Handle Incoming Peer Game Data */
 			case ePacket::PeerState: handlePeerState(packet); break;
 			case ePacket::Bullet: handlePeerBullet(packet); break;
+			case ePacket::Asteroid: handlePeerAsteroid(packet); break;
 		}
 	}
 
@@ -122,13 +123,11 @@ void Peer::updateState()
 		_event = eEvent::Shoot;
 		player.isShooting = false;
 	}
-	else
-		_event = eEvent::None;
 }
 
 void Peer::sendState()
 {
-	//Share movement data etc.. with other peers
+	//Send movement data etc.. to other peers
 
 		sf::Packet statePacket;
 		sf::Packet bulletPacket;
@@ -149,6 +148,10 @@ void Peer::sendState()
 						sendPositionData(peer);
 
 					sendBulletData(peer);
+
+					//Send asteroids data
+					if(_frameCount % 2 == 0)
+						sendAsteroidData(peer);
 				}
 			}
 		}
@@ -173,8 +176,29 @@ void Peer::sendBulletData(const PeerEndPoint& endPoint)
 	if (_event == eEvent::Shoot) {
 		bulletPacket << ePacket::Bullet << (uint8_t)_id << player.getPosition().x << player.getPosition().y
 			<< player.getDirection().x << player.getDirection().y;
+
 		sendPacket(bulletPacket, endPoint);
+
+		_event = eEvent::None;
 	}
+}
+
+void Peer::sendAsteroidData(const PeerEndPoint& endPoint)
+{
+	sf::Packet asteroidPacket;
+	auto& asteroids = _multi.getAsteroids(_id);
+
+	//if (_event == eEvent::AsteroidSpawn) {
+		
+		for (size_t i = 0; i < asteroids.size(); ++i) {
+			auto& a = asteroids[i];
+
+			asteroidPacket << ePacket::Asteroid << (uint8_t)_id << (uint8_t)i <<
+				a.getPosition().x << a.getPosition().y << a.getRotation();
+
+			sendPacket(asteroidPacket, endPoint);
+		}
+	//}
 }
 
 void Peer::handleConnectionRequest(const sf::IpAddress& address, uint16_t port)
@@ -192,9 +216,13 @@ void Peer::handleConnectionRequest(const sf::IpAddress& address, uint16_t port)
 	Client_t peerId = _multi.addPlayer(endPoint);
 	_multi.handleSpawn(peerId, spawnPosition.x, spawnPosition.y);
 
+	_event = eEvent::AsteroidSpawn;
+
 	response << ePacket::ConnectionResponse << (uint8_t)1 << peerId << _id << spawnPosition.x << spawnPosition.y;
 	sendPacket(response, endPoint);
+
 	_multi.setSimRunning(_id, true);
+	_multi.setSimRunning(peerId, true);
 }
 
 void Peer::handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& address, uint16_t port)
@@ -213,10 +241,12 @@ void Peer::handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& add
 				if (packet >> our_id >> host_id >> x >> y) {
 					//Save id and host id and create new peer
 					_id = our_id;
+				
 					std::cout << "Host id: " << (int)host_id << std::endl;
 					std::cout << "Our id: " << (int)our_id << std::endl;
 					_multi.addPlayer(_multi.getHost(), host_id); //add host
 					_multi.addPlayer({ this->address, this->port }, _id); //add ourself
+
 					_multi.handleSpawn(_id, x, y);
 
 					socket.setBlocking(false);
@@ -225,6 +255,7 @@ void Peer::handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& add
 					*/
 					_connected = true;
 					_multi.setSimRunning(_id, true);
+					_multi.setSimRunning(host_id, true);
 				}
 			}
 		}
@@ -262,6 +293,17 @@ void Peer::handlePeerBullet(sf::Packet& packet)
 	if (packet >> id) {
 		packet >> x >> y >> dx >> dy;
 		_multi.spawnPeerBullet(id, { x, y, dx, dy });
+	}
+}
+
+void Peer::handlePeerAsteroid(sf::Packet& packet)
+{
+	Client_t id;
+	uint8_t asteroid_id;
+	float x, y, rot;
+	if (packet >> id >> asteroid_id) {
+		packet >> x >> y >> rot;
+		_multi.updateAsteroid(id, asteroid_id, {x, y, rot });
 	}
 }
 
