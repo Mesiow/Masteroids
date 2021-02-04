@@ -150,8 +150,11 @@ void Peer::sendState()
 					sendBulletData(peer);
 
 					//Send asteroids data
-					if(_frameCount % 2 == 0)
+					if (_syncTimer.getElapsedTime().asSeconds() >= 1.0f) {
+						std::cout << "Sending asteroid data\n";
 						sendAsteroidData(peer);
+						_syncTimer.restart();
+					}
 				}
 			}
 		}
@@ -188,17 +191,18 @@ void Peer::sendAsteroidData(const PeerEndPoint& endPoint)
 	sf::Packet asteroidPacket;
 	auto& asteroids = _multi.getAsteroids(_id);
 
-	//if (_event == eEvent::AsteroidSpawn) {
-		
+	if (asteroids.size() > 0) {
 		for (size_t i = 0; i < asteroids.size(); ++i) {
 			auto& a = asteroids[i];
 
-			asteroidPacket << ePacket::Asteroid << (uint8_t)_id << (uint8_t)i <<
-				a.getPosition().x << a.getPosition().y << a.getRotation();
+			asteroidPacket << ePacket::Asteroid  << (uint8_t)i <<
+				a.getPosition().x << a.getPosition().y
+				<< a.getDirection().x << a.getDirection().y
+				<< a.getRotation();
 
 			sendPacket(asteroidPacket, endPoint);
 		}
-	//}
+	}
 }
 
 void Peer::handleConnectionRequest(const sf::IpAddress& address, uint16_t port)
@@ -215,6 +219,7 @@ void Peer::handleConnectionRequest(const sf::IpAddress& address, uint16_t port)
 
 	Client_t peerId = _multi.addPlayer(endPoint);
 	_multi.handleSpawn(peerId, spawnPosition.x, spawnPosition.y);
+	_multi.handleAsteroidSpawn(_id, 10, 10);
 
 	_event = eEvent::AsteroidSpawn;
 
@@ -248,6 +253,7 @@ void Peer::handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& add
 					_multi.addPlayer({ this->address, this->port }, _id); //add ourself
 
 					_multi.handleSpawn(_id, x, y);
+					_multi.handleAsteroidSpawn(_id, 10, 10);
 
 					socket.setBlocking(false);
 					/*
@@ -298,12 +304,11 @@ void Peer::handlePeerBullet(sf::Packet& packet)
 
 void Peer::handlePeerAsteroid(sf::Packet& packet)
 {
-	Client_t id;
 	uint8_t asteroid_id;
-	float x, y, rot;
-	if (packet >> id >> asteroid_id) {
-		packet >> x >> y >> rot;
-		_multi.updateAsteroid(id, asteroid_id, {x, y, rot });
+	float x, y, dx, dy, rot;
+	if (packet >> asteroid_id) {
+		packet >> x >> y >> dx >> dy >> rot;
+		_multi.updateAsteroid(_id, asteroid_id, {x, y, dx, dy, rot });
 	}
 }
 

@@ -22,7 +22,7 @@ struct BulletState {
 };
 
 struct AsteroidState {
-	float x, y;
+	float x, y, dx, dy;
 	float rot;
 };
 
@@ -44,6 +44,9 @@ public:
 		Update peer with new state data
 	*/
 	void updatePeer(Client_t id, PeerState state);
+	/*
+		Sync asteroid
+	*/
 	void updateAsteroid(Client_t id, uint8_t asteroidId, AsteroidState state);
 	/*
 		Spawn peer bullets with new bullet data

@@ -3,7 +3,7 @@
 #include "Constants.h"
 #include "Packets.h"
 
-//TODO: Get Asteroids networked
+//TODO: Get Asteroids networked and synced
 
 //Events of each peer
 enum class eEvent : uint8_t {
@@ -74,4 +74,9 @@ private:
 	bool _foundHost = false;
 
 	int _frameCount = 0;
+
+	/*
+		Timer used to determine when to send asteroid state updates for syncing
+	*/
+	sf::Clock _syncTimer;
 };

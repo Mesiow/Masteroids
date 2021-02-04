@@ -82,8 +82,12 @@ void Multiplayer::updatePeer(Client_t id, PeerState state)
 void Multiplayer::updateAsteroid(Client_t id, uint8_t asteroidId, AsteroidState state)
 {
 	if (_connects[id]) {
-		_asteroids[id]->getAsteroids()[asteroidId].setPosition(state.x, state.y);
-		_asteroids[id]->getAsteroids()[asteroidId].setRotation(state.rot);
+		std::cout << "Size: " << _asteroids[id]->getAsteroids().size() << std::endl;
+		if (_asteroids[id]->getAsteroids().size() > 0) {
+			std::cout << "Updating\n";
+			_asteroids[id]->getAsteroids()[asteroidId].setPosition(state.x, state.y);
+			_asteroids[id]->getAsteroids()[asteroidId].setRotation(state.rot);
+		}
 	}
 }
 
@@ -96,12 +100,11 @@ void Multiplayer::spawnPeerBullet(Client_t id, BulletState state)
 
 void Multiplayer::spawnPeerAsteroid(Client_t id, AsteroidState state)
 {
-	/*if (_connects[id]) {
-		_asteroids[id]->getAsteroids()[id]
+	if (_connects[id]) {
 		Asteroid asteroid(64.0f, sf::Vector2f(state.x, state.y), sf::Vector2f(state.dx, state.dy));
 		_asteroids[id]->add(asteroid);
 		std::cout << "spawned at " <<state.x <<", "<< state.y << "\n";
-	}*/
+	}
 }
 
 void Multiplayer::addPlayer(PeerEndPoint endPoint, Client_t id)
@@ -113,8 +116,9 @@ void Multiplayer::addPlayer(PeerEndPoint endPoint, Client_t id)
 	_peerEndPoints[id] = endPoint;
 	_connects[id] = true;
 	_peers[id] = new Player(playerColor);
+
 	_asteroids[id] = new AsteroidManager();
-	if (id == 0) _asteroids[id]->spawn(10, 10); //If host, spawn asteroid
+	_asteroids[id]->setSeed(1);
 
 	std::cout << "Id: " << (int)id << std::endl;
 }
@@ -166,7 +170,10 @@ void Multiplayer::handleSpawn(Client_t id, float x, float y)
 
 void Multiplayer::handleAsteroidSpawn(Client_t id, float x, float y)
 {
-	_asteroids[id]->spawn(x, y);
+	if (_connects[id]) {
+		Asteroid asteroid(64.0f, x, y);
+		_asteroids[id]->add(asteroid);
+	}
 }
 
 void Multiplayer::zeroMem()

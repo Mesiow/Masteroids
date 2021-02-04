@@ -42,6 +42,11 @@ void Asteroid::setPosition(float x, float y)
 	_shape.setPosition(x, y);
 }
 
+void Asteroid::setDirection(float x, float y)
+{
+	_direction = sf::Vector2f(x, y);
+}
+
 void Asteroid::setRotation(float rot)
 {
 	_shape.setRotation(rot);
@@ -96,7 +101,6 @@ void Asteroid::build()
 
 void Asteroid::initialize()
 {
-	thor::setRandomSeed(1);
 	//Random direction
 	float rx = thor::random(0.0f, 360.0f);
 	float ry = thor::random(0.0f, 360.0f);

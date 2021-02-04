@@ -15,6 +15,12 @@ void AsteroidManager::update(float& dt)
 	for (auto& a : _asteroids) a.update(dt);
 }
 
+void AsteroidManager::setSeed(unsigned int seed)
+{
+	_seed = seed;
+	thor::setRandomSeed(_seed);
+}
+
 void AsteroidManager::add(Asteroid& asteroid)
 {
 	_asteroids.push_back(asteroid);
@@ -34,12 +40,8 @@ void AsteroidManager::spawn(float xoffset, float yoffset)
 
 void AsteroidManager::spawnNewRound(int round, float playerAngle)
 {
-	int count = thor::random(1, round);
+	int count = 1 * round;
 	for (size_t i = 0; i < count; ++i) {
-		spawn(
-			30.0f * sinf(playerAngle + M_PI / 2.0f),
-			30.0f * cosf(playerAngle + M_PI / 2.0f)
-		);
 		spawn(
 			30.0f * sinf(playerAngle - M_PI / 2.0f),
 			30.0f * cosf(playerAngle - M_PI / 2.0f)

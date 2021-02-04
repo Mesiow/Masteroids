@@ -12,6 +12,7 @@ public:
 	void update(float& dt);
 	
 	void setPosition(float x, float y);
+	void setDirection(float x, float y);
 	void setRotation(float rot);
 
 

@@ -9,6 +9,9 @@ public:
 	void render(sf::RenderTarget& target);
 	void update(float& dt);
 
+	//Set seed for asteroid generation
+	void setSeed(unsigned int seed);
+
 	void add(Asteroid& asteroid);
 	void remove(int index);
 	void spawn(float xoffset, float yoffset);
@@ -24,4 +27,5 @@ public:
 	
 private:
 	std::vector<Asteroid> _asteroids;
+	int _seed;
 };
