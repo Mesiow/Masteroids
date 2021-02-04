@@ -10,14 +10,9 @@ SPState::SPState(Game* game)
 
 	_player = new Player();
 
-	//Spawn asteroid to the left and right of the player
 	_asteroidManager.spawnNewRound(_round, _player->getRotation());
 
-	_scoreText.setFont(ResourceManager::getFont("mont"));
-	_scoreText.setFillColor(sf::Color::White);
-	_scoreText.setPosition(10, 20);
-	_scoreText.setString("Score: " + std::to_string(_score));
-	_scoreText.setCharacterSize(15);
+	initText();
 }
 
 SPState::~SPState()
@@ -53,7 +48,7 @@ void SPState::update(float dt)
 
 	if (_player->isDead) reset();
 
-	_scoreText.setString("Score: " + std::to_string(_score));
+	updateText();
 }
 
 void SPState::render(sf::RenderWindow& window)
@@ -63,13 +58,58 @@ void SPState::render(sf::RenderWindow& window)
 	//_counter.render(window);
 
 	window.draw(_scoreText);
+	window.draw(_livesText);
+	
 
 	/* Render game entities */
 
 	_player->render(window);
 
 	_asteroidManager.render(window);
-	
+
+	checkGameOver(window);
+}
+
+void SPState::initText()
+{
+	_scoreText.setFont(ResourceManager::getFont("mont"));
+	_scoreText.setFillColor(sf::Color::White);
+	_scoreText.setString("Score: " + std::to_string(_score));
+	_scoreText.setCharacterSize(18);
+	_scoreText.setPosition((SCREEN_WIDTH - _scoreText.getGlobalBounds().width) - 10, 20);
+
+	_livesText.setFont(ResourceManager::getFont("mont"));
+	_livesText.setFillColor(sf::Color::White);
+	_livesText.setPosition(10, 20);
+	std::string count = "| | |";
+	std::string str = "Lives: " + count;
+	_livesText.setString(str);
+	_livesText.setCharacterSize(18);
+
+
+	_gameOverText.setFont(ResourceManager::getFont("mont"));
+	_gameOverText.setFillColor(sf::Color::White);
+	_gameOverText.setString("Game Over!");
+	_gameOverText.setCharacterSize(30);
+	_gameOverText.setOrigin(sf::Vector2f(_gameOverText.getLocalBounds().width / 2.0f, _gameOverText.getLocalBounds().height / 2.0f + 45.0f));
+	_gameOverText.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+}
+
+void SPState::updateText()
+{
+	_scoreText.setString("Score: " + std::to_string(_score));
+	switch (_lives) {
+		case 2: {
+			std::string count = "| |";
+			_livesText.setString("Lives: " + count);
+		}break;
+		case 1: {
+			std::string count = "|";
+			_livesText.setString("Lives: " + count);
+		}break;
+
+		default: break;
+	}
 }
 
 void SPState::detectAndHandleCollision()
@@ -103,7 +143,7 @@ void SPState::detectAndHandleCollision()
 					/*
 						Only split asteroids if they have a radius greater than 4
 					*/
-					if (asteroid.getRadius() > 4) {
+					if (asteroid.getRadius() > 8) {
 						newAsteroids = _asteroidManager.split(asteroid);
 					}
 				}
@@ -146,4 +186,17 @@ void SPState::detectAndHandleCollision()
 void SPState::reset()
 {
 	_player->reset();
+	_lives--;
+	if (_lives == 0) _gameOver = true;
+	if (_gameOver) _gameOverWait.restart();
+}
+
+void SPState::checkGameOver(sf::RenderTarget& target)
+{
+	if (_gameOver) {
+		target.draw(_gameOverText);
+		if (_gameOverWait.getElapsedTime().asSeconds() >= 2.5f) {
+			_game->popState();
+		}
+	}
 }

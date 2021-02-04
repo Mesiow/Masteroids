@@ -21,6 +21,8 @@ public:
 	void render(sf::RenderWindow& window)override;
 
 private:
+	void initText();
+	void updateText();
 	/*
 		Splits single asteroid into a smaller versions, based on parent radius and position
 	*/
@@ -29,6 +31,7 @@ private:
 		Reset game state
 	*/
 	void reset();
+	void checkGameOver(sf::RenderTarget &target);
 
 private:
 	Starfield _starfield;
@@ -41,6 +44,13 @@ private:
 	AsteroidManager _asteroidManager;
 	
 	sf::Text _scoreText;
+	sf::Text _livesText;
+	sf::Text _gameOverText;
+
 	int _score = 0;
 	int _round = 1;
+	int _lives = 3;
+	bool _gameOver = false;
+
+	sf::Clock _gameOverWait;
 };
