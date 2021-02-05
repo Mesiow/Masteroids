@@ -98,7 +98,7 @@ void Multiplayer::spawnPeerBullet(Client_t id, BulletState state)
 	}
 }
 
-void Multiplayer::addPlayer(PeerEndPoint endPoint, Client_t id)
+void Multiplayer::addPlayer(const EndPoint& endPoint, Client_t id)
 {
 	sf::Color playerColor;
 	if (id == 0) playerColor = sf::Color::Green;
@@ -114,7 +114,7 @@ void Multiplayer::addPlayer(PeerEndPoint endPoint, Client_t id)
 	std::cout << "Id: " << (int)id << std::endl;
 }
 
-Client_t Multiplayer::addPlayer(PeerEndPoint endPoint)
+Client_t Multiplayer::addPlayer(const EndPoint& endPoint)
 {
 	int slot = emptySlot();
 	if (slot != -1) {
@@ -128,7 +128,7 @@ Client_t Multiplayer::addPlayer(PeerEndPoint endPoint)
 	}
 }
 
-void Multiplayer::setHost(PeerEndPoint host)
+void Multiplayer::setHost(const EndPoint& host)
 {
 	_host.address = host.address;
 	_host.port = host.port;
@@ -139,12 +139,12 @@ void Multiplayer::setSimRunning(Client_t id, bool running)
 	_simRunning[id] = running;
 }
 
-PeerEndPoint Multiplayer::getHost() const
+EndPoint Multiplayer::getHost() const
 {
 	return _host;
 }
 
-PeerEndPoint Multiplayer::getPeer(Client_t id) const
+EndPoint Multiplayer::getPeer(Client_t id) const
 {
 	return _peerEndPoints[id];
 }
@@ -169,7 +169,7 @@ void Multiplayer::handleAsteroidSpawn(Client_t id, float x, float y)
 
 void Multiplayer::zeroMem()
 {
-	std::fill(_peerEndPoints.begin(), _peerEndPoints.end(), PeerEndPoint());
+	std::fill(_peerEndPoints.begin(), _peerEndPoints.end(), EndPoint());
 	std::fill(_peers.begin(), _peers.end(), nullptr);
 	std::fill(_connects.begin(), _connects.end(), false);
 	std::fill(_simRunning.begin(), _simRunning.end(), false);

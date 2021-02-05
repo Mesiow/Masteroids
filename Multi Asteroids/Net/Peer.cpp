@@ -73,7 +73,7 @@ void Peer::initialize()
 	}
 }
 
-void Peer::sendPacket(sf::Packet& packet, PeerEndPoint endPoint)
+void Peer::sendPacket(sf::Packet& packet, const EndPoint& endPoint)
 {
 	socket.send(packet, endPoint.address, endPoint.port);
 }
@@ -132,7 +132,7 @@ void Peer::sendState()
 		sf::Packet statePacket;
 		sf::Packet bulletPacket;
 		if (!_isHost) { //Then we are a peer
-			PeerEndPoint peer = _multi.getHost();
+			EndPoint peer = _multi.getHost();
 			if (_frameCount % 2 == 0) //send data every 2nd frame to avoid congestion
 				sendPositionData(peer);
 
@@ -141,7 +141,7 @@ void Peer::sendState()
 		else {
 			//Host
 			for (size_t i = 0; i < MAX_CONNECTIONS; i++) {
-				PeerEndPoint peer = _multi.getPeer(i);
+				EndPoint peer = _multi.getPeer(i);
 				//Make sure host does not send data to itself and only to other peers
 				if (_multi.getHost().port != peer.port) {
 					if (_frameCount % 2 == 0)
@@ -159,7 +159,7 @@ void Peer::sendState()
 		}
 }
 
-void Peer::sendPositionData(const PeerEndPoint& endPoint)
+void Peer::sendPositionData(const EndPoint& endPoint)
 {
 	sf::Packet statePacket;
 	auto& player = _multi.getPlayer(_id); 
@@ -170,7 +170,7 @@ void Peer::sendPositionData(const PeerEndPoint& endPoint)
 	sendPacket(statePacket, endPoint);
 }
 
-void Peer::sendBulletData(const PeerEndPoint& endPoint)
+void Peer::sendBulletData(const EndPoint& endPoint)
 {
 	sf::Packet bulletPacket;
 	auto& player = _multi.getPlayer(_id);
@@ -185,7 +185,7 @@ void Peer::sendBulletData(const PeerEndPoint& endPoint)
 	}
 }
 
-void Peer::sendAsteroidData(const PeerEndPoint& endPoint)
+void Peer::sendAsteroidData(const EndPoint& endPoint)
 {
 	sf::Packet asteroidPacket;
 	auto& asteroids = _multi.getAsteroids(_id);
@@ -210,7 +210,7 @@ void Peer::handleConnectionRequest(const sf::IpAddress& address, uint16_t port)
 		This function should only run on the peer who is hosting.
 	*/
 	sf::Packet response;
-	PeerEndPoint endPoint;
+	EndPoint endPoint;
 	endPoint.address = address;
 	endPoint.port = port;
 

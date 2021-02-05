@@ -33,7 +33,7 @@ public:
 private:
 	void initSocket();
 	void initialize();
-	void sendPacket(sf::Packet& packet, PeerEndPoint endPoint);
+	void sendPacket(sf::Packet& packet, const EndPoint& endPoint)override;
 
 	/*
 		peer will broadcast to the host port to find a hosted game
@@ -45,9 +45,9 @@ private:
 	void updateState();
 	void sendState();
 
-	void sendPositionData(const PeerEndPoint& endPoint);
-	void sendBulletData(const PeerEndPoint &endPoint);
-	void sendAsteroidData(const PeerEndPoint& endPoint);
+	void sendPositionData(const EndPoint& endPoint);
+	void sendBulletData(const EndPoint& endPoint);
+	void sendAsteroidData(const EndPoint& endPoint);
 
 	void handleConnectionRequest(const sf::IpAddress& address, uint16_t port);
 	void handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& address, uint16_t port);

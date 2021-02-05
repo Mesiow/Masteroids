@@ -7,10 +7,6 @@
 #include <algorithm>
 #include <array>
 
-struct PeerEndPoint {
-	sf::IpAddress address;
-	uint16_t port;
-};
 
 struct PeerState {
 	float x, y;
@@ -56,21 +52,22 @@ public:
 	void handleSpawn(Client_t id, float x, float y);
 	void handleAsteroidSpawn(Client_t id, float x, float y);
 
-	void addPlayer(PeerEndPoint endPoint, Client_t id);
+	void addPlayer(const EndPoint &endPoint, Client_t id);
 	/*
 		Function used for players connecting to already running host.
 		Returns new client id slot for this player
 	*/
-	Client_t addPlayer(PeerEndPoint endPoint);
+	Client_t addPlayer(const EndPoint &endPoint);
 
-	void setHost(PeerEndPoint host);
+	void setHost(const EndPoint& host);
 	/*
 		Set if the simulation is running for a client
 	*/
 	void setSimRunning(Client_t id, bool running);
 
-	PeerEndPoint getHost()const;
-	PeerEndPoint getPeer(Client_t id)const;
+	EndPoint getHost()const;
+	EndPoint getPeer(Client_t id)const;
+
 	bool isPeerConnected(Client_t id)const;
 	bool isSimRunning(Client_t id)const { return _simRunning[id]; }
 
@@ -87,8 +84,8 @@ private:
 	bool playersAreReady();
 
 private:
-	PeerEndPoint _host;
-	std::array<PeerEndPoint, MAX_CONNECTIONS> _peerEndPoints;
+	EndPoint _host;
+	std::array<EndPoint, MAX_CONNECTIONS> _peerEndPoints;
 	std::array<Player*, MAX_CONNECTIONS> _peers;
 	std::array<AsteroidManager*, MAX_CONNECTIONS> _asteroids;
 	std::array<bool, MAX_CONNECTIONS> _connects;
