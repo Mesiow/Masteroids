@@ -3,7 +3,7 @@
 #include "Constants.h"
 #include "Packets.h"
 
-//TODO: Get Asteroids networked and synced
+//TODO: Get Asteroids networked and synced properly
 
 //Events of each peer
 enum class eEvent : uint8_t {

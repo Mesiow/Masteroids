@@ -18,7 +18,6 @@ public:
 	void update(float dt)override;
 	void render(sf::RenderWindow& window)override;
 
-
 private:
 	Peer* _peer = nullptr; //multiplayer instance
 	Starfield _starfield;

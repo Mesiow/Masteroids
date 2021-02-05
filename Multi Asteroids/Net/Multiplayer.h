@@ -53,8 +53,6 @@ public:
 	*/
 	void spawnPeerBullet(Client_t id, BulletState state);
 
-	void spawnPeerAsteroid(Client_t id, AsteroidState state);
-
 	void handleSpawn(Client_t id, float x, float y);
 	void handleAsteroidSpawn(Client_t id, float x, float y);
 

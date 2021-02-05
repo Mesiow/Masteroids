@@ -98,15 +98,6 @@ void Multiplayer::spawnPeerBullet(Client_t id, BulletState state)
 	}
 }
 
-void Multiplayer::spawnPeerAsteroid(Client_t id, AsteroidState state)
-{
-	if (_connects[id]) {
-		Asteroid asteroid(64.0f, sf::Vector2f(state.x, state.y), sf::Vector2f(state.dx, state.dy));
-		_asteroids[id]->add(asteroid);
-		std::cout << "spawned at " <<state.x <<", "<< state.y << "\n";
-	}
-}
-
 void Multiplayer::addPlayer(PeerEndPoint endPoint, Client_t id)
 {
 	sf::Color playerColor;

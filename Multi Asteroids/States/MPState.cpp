@@ -8,16 +8,16 @@ MPState::MPState(Game* game)
 	_starfield.setStarCount(500);
 	_starfield.populate();
 
-	char c;
-	std::cout << "1. Host\n";
-	std::cout << "2. Peer\n";
-	std::cin >> c;
-	if (c == '1') {
-		_peer = new Peer(true);
-	}
-	else if (c == '2') {
-		_peer = new Peer();
-	}
+	//char c;
+	//std::cout << "1. Host\n";
+	//std::cout << "2. Peer\n";
+	//std::cin >> c;
+	//if (c == '1') {
+	//	_peer = new Peer(true);
+	//}
+	//else if (c == '2') {
+	//	_peer = new Peer();
+	//}
 }
 
 MPState::~MPState()
@@ -27,12 +27,12 @@ MPState::~MPState()
 
 void MPState::handleEvents(sf::Event& ev, sf::RenderWindow& window)
 {
-	_peer->handleEvents(ev);
+	 _peer->handleEvents(ev);
 }
 
 void MPState::handleInput(float dt)
 {
-	_peer->handleInput(dt);
+	if(_peer) _peer->handleInput(dt);
 }
 
 void MPState::update(float dt)
@@ -50,3 +50,4 @@ void MPState::render(sf::RenderWindow& window)
 
 	_peer->render(window);
 }
+

@@ -149,9 +149,8 @@ void Peer::sendState()
 
 					sendBulletData(peer);
 
-					//Send asteroids data
+					//Send asteroids data, sync every second
 					if (_syncTimer.getElapsedTime().asSeconds() >= 1.0f) {
-						std::cout << "Sending asteroid data\n";
 						sendAsteroidData(peer);
 						_syncTimer.restart();
 					}
