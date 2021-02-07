@@ -1,0 +1,101 @@
+ChildWindow.LobbyWindow {
+    Enabled = false;
+    Position = (535, 110);
+    PositionLocked = true;
+    Size = (210, 300);
+    TitleAlignment = Right;
+    TitleButtons = None;
+
+    Renderer {
+        backgroundcolor = rgba(180, 180, 180, 215);
+        bordercolor = rgba(240, 240, 240, 215);
+        borders = (1, 1, 1, 1);
+        distancetoside = 3;
+        maximizebutton = {
+backgroundcolor = rgba(180, 180, 180, 215);
+backgroundcolordown = rgba(150, 150, 150, 215);
+backgroundcolorhover = rgba(190, 190, 190, 215);
+bordercolor = rgba(240, 240, 240, 215);
+borders = (1, 1, 1, 1);
+textcolor = rgba(255, 255, 255, 215);
+textcolordown = rgba(255, 255, 255, 235);
+textcolorhover = rgba(255, 255, 255, 235);
+};
+        minimizebutton = {
+backgroundcolor = rgba(180, 180, 180, 215);
+backgroundcolordown = rgba(150, 150, 150, 215);
+backgroundcolorhover = rgba(190, 190, 190, 215);
+bordercolor = rgba(240, 240, 240, 215);
+borders = (1, 1, 1, 1);
+textcolor = rgba(255, 255, 255, 215);
+textcolordown = rgba(255, 255, 255, 235);
+textcolorhover = rgba(255, 255, 255, 235);
+};
+        paddingbetweenbuttons = 1;
+        showtextontitlebuttons = true;
+        texturebackground = None;
+        texturetitlebar = None;
+        titlebarcolor = rgba(170, 170, 170, 215);
+        titlecolor = rgba(255, 255, 255, 215);
+
+        closebutton {
+            backgroundcolor = rgba(180, 180, 180, 215);
+            backgroundcolordown = rgba(150, 150, 150, 215);
+            backgroundcolorhover = rgba(190, 190, 190, 215);
+            bordercolor = rgba(240, 240, 240, 215);
+            borders = (1, 1, 1, 1);
+            textcolor = rgba(255, 255, 255, 215);
+            textcolordown = rgba(255, 255, 255, 235);
+            textcolorhover = rgba(255, 255, 255, 235);
+        }
+    }
+}
+
+ListBox.GameList {
+    ItemHeight = 20;
+    Items = [Game1];
+    MaximumItems = 0;
+    Position = (550, 140);
+    Size = (180, 272);
+    TextSize = 13;
+
+    Renderer {
+        backgroundcolor = rgb(210, 210, 210);
+        bordercolor = White;
+        borders = (2, 2, 2, 2);
+        selectedbackgroundcolor = rgb(190, 225, 235);
+        selectedtextcolor = rgb(150, 150, 150);
+        textcolor = rgb(100, 100, 100);
+        texturebackground = None;
+
+        scrollbar {
+            texturearrowdown = "Res/gui/themes/BabyBlue.png" Part(20, 2, 16, 16);
+            texturearrowup = "Res/gui/themes/BabyBlue.png" Part(2, 2, 16, 16);
+            texturethumb = "Res/gui/themes/BabyBlue.png" Part(414, 2, 16, 32);
+            texturetrack = "Res/gui/themes/BabyBlue.png" Part(432, 2, 16, 32);
+        }
+    }
+}
+
+Button.BackBtn {
+    Position = (30, 660);
+    Size = (80, 23.25);
+    Text = Back;
+    TextSize = 14;
+
+    Renderer {
+        backgroundcolor = rgba(180, 180, 180, 215);
+        backgroundcolordown = rgba(150, 150, 150, 215);
+        backgroundcolorhover = rgba(190, 190, 190, 215);
+        bordercolor = rgba(240, 240, 240, 215);
+        borders = (1, 1, 1, 1);
+        textcolor = rgba(255, 255, 255, 215);
+        textcolordown = rgba(255, 255, 255, 235);
+        textcolorhover = rgba(255, 255, 255, 235);
+        texture = None;
+        texturedisabled = None;
+        texturedown = None;
+        texturefocused = None;
+        texturehover = None;
+    }
+}

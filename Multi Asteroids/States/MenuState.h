@@ -4,7 +4,8 @@
 enum class MenuLocation {
 	Main = 0,
 	Mp,
-	MpSub
+	MpList,
+	MpLobby
 };
 
 class MenuState : public State {
@@ -29,4 +30,5 @@ private:
 
 	tgui::Gui _gui;
 	tgui::Gui _mpmenu;
+	tgui::Gui _mplist;
 };

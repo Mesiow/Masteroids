@@ -10,7 +10,7 @@
 */
 class MPState : public State {
 public:
-	MPState(Game* game);
+	MPState(Game* game, bool peerHost = true);
 	~MPState();
 
 	void handleEvents(sf::Event& ev, sf::RenderWindow& window)override;

@@ -22,7 +22,7 @@ Button.HostBtn {
     renderer = &1;
 }
 
-Button.Join {
+Button.JoinBtn {
     Position = ((1280 / 2) - (80 / 2), 280);
     Size = (80, 23.25);
     Text = Join;
@@ -35,20 +35,5 @@ Button.BackBtn {
     Size = (80, 23.25);
     Text = Back;
     TextSize = 14;
-
-    Renderer {
-        backgroundcolor = rgba(180, 180, 180, 215);
-        backgroundcolordown = rgba(150, 150, 150, 215);
-        backgroundcolorhover = rgba(190, 190, 190, 215);
-        bordercolor = rgba(240, 240, 240, 215);
-        borders = (1, 1, 1, 1);
-        textcolor = rgba(255, 255, 255, 215);
-        textcolordown = rgba(255, 255, 255, 235);
-        textcolorhover = rgba(255, 255, 255, 235);
-        texture = None;
-        texturedisabled = None;
-        texturedown = None;
-        texturefocused = None;
-        texturehover = None;
-    }
+    renderer = &1;
 }
