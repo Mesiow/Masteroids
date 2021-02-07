@@ -28,6 +28,8 @@ void Multiplayer::render(sf::RenderTarget& target)
 
 void Multiplayer::update(Client_t id, float dt)
 {
+	_elapsedTime = dt;
+
 	if (playersAreReady() && !_running) {
 		std::cout << "Running\n";
 		_running = true;
@@ -65,27 +67,118 @@ void Multiplayer::handleEvents(Client_t id, sf::Event& ev)
 		_peers[id]->handleEvents(ev);
 }
 
+void Multiplayer::handleCollisions(Client_t id, eEvent& event)
+{
+	//Handle Collisions
+	auto player = _peers[id];
+
+	auto& pbullets = _peers[id]->getBullets();
+	std::vector<int> bulletsToRemove; //vector of bullet indexes to remove
+	std::vector<int> asteroidsToRemove;
+	std::vector<Asteroid> newAsteroids; //new asteroid vector to append new asteroids that split
+
+	auto asteroidManager = getAsteroidManager(id);
+	auto& asteroids = getAsteroids(id);
+	size_t numAsteroids = getAsteroids(id).size();
+
+	if (pbullets.size() > 0 && numAsteroids > 0) {
+		for (size_t i = 0; i < numAsteroids; ++i) {
+			for (size_t j = 0; j < pbullets.size(); ++j) {
+				auto& bullet = pbullets[j];
+				auto& asteroid = asteroids[i];
+
+				/*
+					Bullet collision with asteroid
+				*/
+				if (Collision::hasCollided(bullet, asteroid)) {
+					event = eEvent::AsteroidHit;
+					/*
+						store bullet index to remove for outside of this loop
+					*/
+					bulletsToRemove.push_back(j);
+					asteroidsToRemove.push_back(i);
+					std::cout << "Bullet hit asteroid\n";
+
+					//_score++;
+
+					/*
+						Only split asteroids if they have a radius greater than 4
+					*/
+					if (asteroid.getRadius() > 8) {
+						//newAsteroids = _asteroidManager.split(asteroid);
+					}
+				}
+			}
+		}
+	}
+
+	//if (numAsteroids > 0) {
+	//	/*
+	//		Check player collision with an asteroid
+	//	*/
+	//	for (auto& a : asteroids) {
+	//		if (Collision::hasCollided(*_player, a)) {
+	//			_player->isDead = true;
+	//		}
+	//	}
+	//}
+
+	//If any bullets to remove, remove them
+	if (bulletsToRemove.size() > 0) {
+		for (size_t i = 0; i < bulletsToRemove.size(); i++) {
+			player->removeBullet(bulletsToRemove[i]);
+		}
+	}
+
+	////If any new asteroids, append to original vector and remove old asteroid
+	if (asteroidsToRemove.size() > 0) {
+		for (size_t i = 0; i < asteroidsToRemove.size(); i++) {
+			asteroidManager->remove(asteroidsToRemove[i]);
+		}
+	}
+
+	//	if (newAsteroids.size() > 0) {
+	//		for (auto& a : newAsteroids)
+	//			_asteroidManager.add(a);
+	//	}
+	//}
+}
+
 void Multiplayer::initialize()
 {
 	zeroMem();
 	_host.port = 7777;
+
+	_seed = thor::random(1, 100);
 }
 
 void Multiplayer::updatePeer(Client_t id, PeerState state)
 {
 	if (_connects[id]) {
+		/*_interpCounter += _elapsedTime;
+		_interpCounter = std::clamp(_interpCounter, 0.0f, 1.0f);
+
+		sf::Vector2f oldPosition = _peers[id]->getPosition();
+		std::cout << "Old Pos: " << oldPosition.x << ", " << oldPosition.y << std::endl;
+		sf::Vector2f targetPosition = sf::Vector2f(state.x, state.y);
+		std::cout << "New Pos: " << targetPosition.x << ", " << targetPosition.y << std::endl;
+
+		float xpos = lerp(oldPosition.x, targetPosition.x, _interpCounter);
+		float ypos = lerp(oldPosition.y, targetPosition.y, _interpCounter);*/
+
 		_peers[id]->setPosition(state.x, state.y);
 		_peers[id]->setRotation(state.rot);
+
+		//_interpCounter = 0;
 	}
 }
 
 void Multiplayer::updateAsteroid(Client_t id, uint8_t asteroidId, AsteroidState state)
 {
 	if (_connects[id]) {
-		std::cout << "Size: " << _asteroids[id]->getAsteroids().size() << std::endl;
 		if (_asteroids[id]->getAsteroids().size() > 0) {
-			std::cout << "Updating\n";
 			_asteroids[id]->getAsteroids()[asteroidId].setPosition(state.x, state.y);
+			_asteroids[id]->getAsteroids()[asteroidId].setDirection(state.dx, state.dy);
 			_asteroids[id]->getAsteroids()[asteroidId].setRotation(state.rot);
 		}
 	}
@@ -109,7 +202,9 @@ void Multiplayer::addPlayer(const EndPoint& endPoint, Client_t id)
 	_peers[id] = new Player(playerColor);
 
 	_asteroids[id] = new AsteroidManager();
-	_asteroids[id]->setSeed(1);
+	_asteroids[id]->setSeed(_seed);
+	std::cout << "Seed: " << _seed << std::endl;
+
 
 	std::cout << "Id: " << (int)id << std::endl;
 }
@@ -132,6 +227,11 @@ void Multiplayer::setHost(const EndPoint& host)
 {
 	_host.address = host.address;
 	_host.port = host.port;
+}
+
+void Multiplayer::setSeed(int seed)
+{
+	_seed = seed;
 }
 
 void Multiplayer::setSimRunning(Client_t id, bool running)
@@ -162,8 +262,9 @@ void Multiplayer::handleSpawn(Client_t id, float x, float y)
 void Multiplayer::handleAsteroidSpawn(Client_t id, float x, float y)
 {
 	if (_connects[id]) {
-		Asteroid asteroid(64.0f, x, y);
-		_asteroids[id]->add(asteroid);
+		_asteroids[id]->spawnNewRound(1);
+		/*Asteroid asteroid(64.0f, x, y);
+		_asteroids[id]->add(asteroid);*/
 	}
 }
 

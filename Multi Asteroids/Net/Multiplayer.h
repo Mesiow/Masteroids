@@ -4,9 +4,18 @@
 #include "Packets.h"
 #include "../Entities/Player.h"
 #include "../Entities/AsteroidManager.h"
+#include "../Collision/Collision.h"
 #include <algorithm>
 #include <array>
 
+//Events of each peer
+enum class eEvent : uint8_t {
+	None,
+	Shoot,
+	Dead,
+	AsteroidSpawn,
+	AsteroidHit
+};
 
 struct PeerState {
 	float x, y;
@@ -36,6 +45,7 @@ public:
 	void handleEvents(Client_t id, sf::Event& ev);
 
 
+	void handleCollisions(Client_t id, eEvent& event);
 	/*
 		Update peer with new state data
 	*/
@@ -60,6 +70,7 @@ public:
 	Client_t addPlayer(const EndPoint &endPoint);
 
 	void setHost(const EndPoint& host);
+	void setSeed(int seed);
 	/*
 		Set if the simulation is running for a client
 	*/
@@ -74,7 +85,9 @@ public:
 
 	const Player& getPlayer(Client_t id)const { return *_peers[id]; }
 	const std::vector<Asteroid>& getAsteroids(Client_t id)const { return _asteroids[id]->getAsteroids(); }
+	AsteroidManager* getAsteroidManager(Client_t id) { return _asteroids[id]; }
 	Player& getPlayer(Client_t id) { return *_peers[id]; }
+	int getSeed()const { return _seed; }
 
 private:
 	void initialize();
@@ -90,5 +103,12 @@ private:
 	std::array<AsteroidManager*, MAX_CONNECTIONS> _asteroids;
 	std::array<bool, MAX_CONNECTIONS> _connects;
 	std::array<bool, MAX_CONNECTIONS> _simRunning;
+
+	int _seed;
+	int _round = 1;
+
+	float _interpCounter = 0.0f;
+	float _elapsedTime = 0.0f;
+
 	bool _running = false;
 };

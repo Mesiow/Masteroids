@@ -123,6 +123,8 @@ void Peer::updateState()
 		_event = eEvent::Shoot;
 		player.isShooting = false;
 	}
+
+	_multi.handleCollisions(_id, _event);
 }
 
 void Peer::sendState()
@@ -150,7 +152,7 @@ void Peer::sendState()
 					sendBulletData(peer);
 
 					//Send asteroids data, sync every second
-					if (_syncTimer.getElapsedTime().asSeconds() >= 1.0f) {
+					if (_syncTimer.getElapsedTime().asSeconds() >= 0.5f) {
 						sendAsteroidData(peer);
 						_syncTimer.restart();
 					}
@@ -222,7 +224,9 @@ void Peer::handleConnectionRequest(const sf::IpAddress& address, uint16_t port)
 
 	_event = eEvent::AsteroidSpawn;
 
-	response << ePacket::ConnectionResponse << (uint8_t)1 << peerId << _id << spawnPosition.x << spawnPosition.y;
+	int gameSeed = _multi.getSeed();
+	response << ePacket::ConnectionResponse << (uint8_t)1 << peerId << _id
+		 << gameSeed << spawnPosition.x << spawnPosition.y;
 	sendPacket(response, endPoint);
 
 	_multi.setSimRunning(_id, true);
@@ -234,6 +238,7 @@ void Peer::handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& add
 	uint8_t response;
 	Client_t our_id;
 	Client_t host_id;
+	int gameSeed;
 	float x, y;
 	///*
 	//	Check if incoming response data is coming from the host peer
@@ -242,12 +247,13 @@ void Peer::handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& add
 		std::cout << "Incoming from host\n";
 		if (packet >> response) {
 			if (response) {
-				if (packet >> our_id >> host_id >> x >> y) {
+				if (packet >> our_id >> host_id >> gameSeed >> x >> y) {
 					//Save id and host id and create new peer
 					_id = our_id;
 				
 					std::cout << "Host id: " << (int)host_id << std::endl;
 					std::cout << "Our id: " << (int)our_id << std::endl;
+					_multi.setSeed(gameSeed);
 					_multi.addPlayer(_multi.getHost(), host_id); //add host
 					_multi.addPlayer({ this->address, this->port }, _id); //add ourself
 

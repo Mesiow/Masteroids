@@ -3,15 +3,8 @@
 #include "Constants.h"
 #include "Packets.h"
 
-//TODO: Get Asteroids networked and synced properly
 
-//Events of each peer
-enum class eEvent : uint8_t {
-	None,
-	Shoot,
-	Dead,
-	AsteroidSpawn
-};
+//TODO: Get Asteroids networked and synced properly
 
 class Peer : public Net {
 public:
@@ -36,7 +29,7 @@ private:
 	void sendPacket(sf::Packet& packet, const EndPoint& endPoint)override;
 
 	/*
-		peer will broadcast to the host port to find a hosted game
+		Peer will broadcast to the host port to find a hosted game
 	*/
 	void broadcast(); 
 	void waitForConnections();
@@ -59,7 +52,6 @@ private:
 	void handlePeerBullet(sf::Packet& packet);
 	void handlePeerAsteroid(sf::Packet& packet);
 
-	///////
 	bool connect();
 
 private:
