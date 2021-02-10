@@ -67,7 +67,7 @@ void Multiplayer::handleEvents(Client_t id, sf::Event& ev)
 		_peers[id]->handleEvents(ev);
 }
 
-void Multiplayer::handleCollisions(Client_t id, eEvent& event)
+void Multiplayer::handleCollisions(Client_t id, eEvent& event, std::vector<int>& bullets_To_Remove, std::vector<int>& asteroids_To_Remove)
 {
 	//Handle Collisions
 	auto player = _peers[id];
@@ -97,7 +97,9 @@ void Multiplayer::handleCollisions(Client_t id, eEvent& event)
 					*/
 					bulletsToRemove.push_back(j);
 					asteroidsToRemove.push_back(i);
-					std::cout << "Bullet hit asteroid\n";
+
+					bullets_To_Remove = bulletsToRemove;
+					asteroids_To_Remove = asteroidsToRemove;
 
 					//_score++;
 
@@ -263,8 +265,6 @@ void Multiplayer::handleAsteroidSpawn(Client_t id, float x, float y)
 {
 	if (_connects[id]) {
 		_asteroids[id]->spawnNewRound(1);
-		/*Asteroid asteroid(64.0f, x, y);
-		_asteroids[id]->add(asteroid);*/
 	}
 }
 

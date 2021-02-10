@@ -55,6 +55,9 @@ void Peer::initSocket()
 void Peer::initialize()
 {
 	initSocket();
+
+	_asteroidsToRemove.clear();
+	_bulletsToRemove.clear();
 	if (_isHost) {
 		_id = 0;
 		_multi.setHost({ address, _multi.getHost().port });
@@ -110,7 +113,9 @@ void Peer::receivePackets()
 			/* Handle Incoming Peer Game Data */
 			case ePacket::PeerState: handlePeerState(packet); break;
 			case ePacket::Bullet: handlePeerBullet(packet); break;
+			case ePacket::BulletHit: handlePeerBulletRemove(packet); break;
 			case ePacket::Asteroid: handlePeerAsteroid(packet); break;
+			case ePacket::AsteroidHit: handlePeerAsteroidRemove(packet);
 		}
 	}
 
@@ -124,41 +129,41 @@ void Peer::updateState()
 		player.isShooting = false;
 	}
 
-	_multi.handleCollisions(_id, _event);
+	_multi.handleCollisions(_id, _event, _bulletsToRemove, _asteroidsToRemove);
 }
 
 void Peer::sendState()
 {
 	//Send movement data etc.. to other peers
 
-		sf::Packet statePacket;
-		sf::Packet bulletPacket;
-		if (!_isHost) { //Then we are a peer
-			EndPoint peer = _multi.getHost();
-			if (_frameCount % 2 == 0) //send data every 2nd frame to avoid congestion
-				sendPositionData(peer);
+	if (!_isHost) { //Then we are a peer
+		EndPoint peer = _multi.getHost();
+		if (_frameCount % 2 == 0) //send data every 2nd frame to avoid congestion
+			sendPositionData(peer);
 
-			sendBulletData(peer);
-		}
-		else {
-			//Host
-			for (size_t i = 0; i < MAX_CONNECTIONS; i++) {
-				EndPoint peer = _multi.getPeer(i);
-				//Make sure host does not send data to itself and only to other peers
-				if (_multi.getHost().port != peer.port) {
-					if (_frameCount % 2 == 0)
-						sendPositionData(peer);
+		sendBulletData(peer);
+		sendAsteroidHitEvent(peer);
+	}
+	else {
+		//Host
+		for (size_t i = 0; i < MAX_CONNECTIONS; i++) {
+			EndPoint peer = _multi.getPeer(i);
+			//Make sure host does not send data to itself and only to other peers
+			if (_multi.getHost().port != peer.port) {
+				if (_frameCount % 2 == 0)
+					sendPositionData(peer);
 
-					sendBulletData(peer);
+				sendBulletData(peer);
 
-					//Send asteroids data, sync every second
-					if (_syncTimer.getElapsedTime().asSeconds() >= 0.5f) {
-						sendAsteroidData(peer);
-						_syncTimer.restart();
-					}
+				//Send asteroids data, sync every second
+				if (_syncTimer.getElapsedTime().asSeconds() >= 0.5f) {
+					sendAsteroidData(peer);
+					_syncTimer.restart();
 				}
+				sendAsteroidHitEvent(peer);
 			}
 		}
+	}
 }
 
 void Peer::sendPositionData(const EndPoint& endPoint)
@@ -171,6 +176,7 @@ void Peer::sendPositionData(const EndPoint& endPoint)
 
 	sendPacket(statePacket, endPoint);
 }
+
 
 void Peer::sendBulletData(const EndPoint& endPoint)
 {
@@ -196,13 +202,39 @@ void Peer::sendAsteroidData(const EndPoint& endPoint)
 		for (size_t i = 0; i < asteroids.size(); ++i) {
 			auto& a = asteroids[i];
 
-			asteroidPacket << ePacket::Asteroid  << (uint8_t)i <<
+			asteroidPacket << ePacket::Asteroid << (uint8_t)i <<
 				a.getPosition().x << a.getPosition().y
 				<< a.getDirection().x << a.getDirection().y
 				<< a.getRotation();
 
 			sendPacket(asteroidPacket, endPoint);
 		}
+	}
+}
+
+void Peer::sendAsteroidHitEvent(const EndPoint& endPoint)
+{
+	//send remove indices of asteroid and bullet 
+
+	if (_event == eEvent::AsteroidHit) {
+		sf::Packet asteroidHitPacket;
+		sf::Packet bulletHitPacket;
+		asteroidHitPacket << ePacket::AsteroidHit;
+		bulletHitPacket << ePacket::BulletHit << _id;
+
+		if (_asteroidsToRemove.size() > 0) {
+			for (size_t i = 0; i < _asteroidsToRemove.size(); ++i) {
+				asteroidHitPacket << (uint8_t)_asteroidsToRemove[i];
+			}
+			sendPacket(asteroidHitPacket, endPoint);
+		}
+		if (_bulletsToRemove.size() > 0) {
+			for (size_t i = 0; i < _bulletsToRemove.size(); ++i) {
+				bulletHitPacket << (uint8_t)_bulletsToRemove[i];
+			}
+			sendPacket(bulletHitPacket, endPoint);
+		}
+		_event = eEvent::None;
 	}
 }
 
@@ -307,6 +339,23 @@ void Peer::handlePeerBullet(sf::Packet& packet)
 	}
 }
 
+void Peer::handlePeerBulletRemove(sf::Packet& packet)
+{
+	Client_t id;
+	std::vector<int> toRemove;
+	if (packet >> id) {
+		while (!packet.endOfPacket()) {
+			uint8_t index;
+			packet >> index;
+			toRemove.push_back((int)index);
+		}
+		for (size_t i = 0; i < toRemove.size(); ++i) {
+			_multi.getPlayer(id).removeBullet(toRemove[i]);
+		}
+	}
+	_bulletsToRemove.clear();
+}
+
 void Peer::handlePeerAsteroid(sf::Packet& packet)
 {
 	uint8_t asteroid_id;
@@ -315,6 +364,20 @@ void Peer::handlePeerAsteroid(sf::Packet& packet)
 		packet >> x >> y >> dx >> dy >> rot;
 		_multi.updateAsteroid(_id, asteroid_id, {x, y, dx, dy, rot });
 	}
+}
+
+void Peer::handlePeerAsteroidRemove(sf::Packet& packet)
+{
+	std::vector<int> toRemove;	
+	while (!packet.endOfPacket()) {
+		uint8_t index;
+		packet >> index;
+		toRemove.push_back((int)index);
+	}
+	for (size_t i = 0; i < toRemove.size(); ++i) {
+		_multi.getAsteroidManager(_id)->remove(toRemove[i]);
+	}
+	_asteroidsToRemove.clear();
 }
 
 bool Peer::connect()

@@ -1,4 +1,6 @@
 #include "AsteroidManager.h"
+#include "../Net/Constants.h"
+#include <iostream>
 
 AsteroidManager::AsteroidManager()
 {
@@ -46,6 +48,29 @@ void AsteroidManager::spawnNewRound(int round, float playerAngle)
 			30.0f * sinf(playerAngle - M_PI / 2.0f),
 			30.0f * cosf(playerAngle - M_PI / 2.0f)
 		);
+	}
+}
+
+void AsteroidManager::spawnNewRound(int round)
+{
+	int count = 1 * round;
+	for (size_t i = 0; i < count; ++i) {
+		float xStart = thor::random(10.0f, 15.0f);
+		float xEnd = thor::random(SCREEN_WIDTH - 15.0f, SCREEN_WIDTH - 10.0f);
+
+		float yStart = thor::random(10.0f, 15.0f);
+		float yEnd = thor::random(SCREEN_WIDTH - 15.0f, SCREEN_WIDTH - 10.0f);
+
+		bool spawnWhereX, spawnWhereY;
+		spawnWhereX = thor::random(0, 1);
+		spawnWhereY = thor::random(0, 1);
+		
+		if (spawnWhereX && spawnWhereY) {
+			spawn(xEnd, yEnd);
+		}
+		else {
+			spawn(xStart, yStart);
+		}
 	}
 }
 

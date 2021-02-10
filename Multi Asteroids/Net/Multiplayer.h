@@ -45,7 +45,7 @@ public:
 	void handleEvents(Client_t id, sf::Event& ev);
 
 
-	void handleCollisions(Client_t id, eEvent& event);
+	void handleCollisions(Client_t id, eEvent& event, std::vector<int> &bullets_To_Remove, std::vector<int> &asteroids_To_Remove);
 	/*
 		Update peer with new state data
 	*/

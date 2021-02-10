@@ -16,7 +16,9 @@ enum class ePacket : Packet_t {
 	/* Peer data */
 	PeerState,
 	Bullet,
-	Asteroid
+	BulletHit,
+	Asteroid,
+	AsteroidHit
 };
 
 sf::Packet& operator<<(sf::Packet& packet, ePacket p);

@@ -39,8 +39,10 @@ private:
 	void sendState();
 
 	void sendPositionData(const EndPoint& endPoint);
+
 	void sendBulletData(const EndPoint& endPoint);
 	void sendAsteroidData(const EndPoint& endPoint);
+	void sendAsteroidHitEvent(const EndPoint& endPoint);
 
 	void handleConnectionRequest(const sf::IpAddress& address, uint16_t port);
 	void handleConnectionResponse(sf::Packet &packet, const sf::IpAddress& address, uint16_t port);
@@ -50,7 +52,9 @@ private:
 	/* Handle Game Data Packets */
 	void handlePeerState(sf::Packet& packet);
 	void handlePeerBullet(sf::Packet& packet);
+	void handlePeerBulletRemove(sf::Packet& packet);
 	void handlePeerAsteroid(sf::Packet& packet);
+	void handlePeerAsteroidRemove(sf::Packet& packet);
 
 	bool connect();
 
@@ -59,6 +63,9 @@ private:
 	Input_t _input;
 	Client_t _id;
 	eEvent _event;
+
+	std::vector<int> _asteroidsToRemove; //vector of asteroid index's to remove
+	std::vector<int> _bulletsToRemove;
 
 	bool _isHost = false;
 	bool _connected = false;
